@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <profile name="sbt 1" modules="asmd-24-direct-style_5885" />
+    <profile name="sbt 2" modules="asmd-24-direct-style">
+      <parameters>
+        <parameter value="-explain" />
+        <parameter value="-Xprint:cc" />
+        <parameter value="-Ycc-debug" />
+      </parameters>
+    </profile>
+  </component>
+</project>
