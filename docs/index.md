@@ -7,9 +7,7 @@ style: |
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.3rem; }
   h3 { font-size: 1.1rem; margin-bottom: 0.2em; }
-  h4 { font-size: 1rem; }
-  h5 { font-size: 0.9rem; }
-  h6 { font-size: 0.85rem; }
+  h4 { font-size: 0.9rem; margin-bottom: 0.2em; }
   p { 
     font-size: 0.6rem;
     line-height: 1.2;
@@ -34,7 +32,7 @@ style: |
     color: #36ab51;
   }
   code {
-    font-size: 0.7em;
+    font-size: 0.65em;
   }
   a {
     color: #0366D6;
@@ -73,11 +71,29 @@ style: |
   .cols > div:last-child {
     border-right: none;
   }
+  .smaller li, .smaller p, .smaller code, .smaller pre {
+    font-size: 0.5rem !important;
+  }
+  .center-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    width: fit-content;
+  }
+  .center-list li {
+    text-align: center;
+  }
+  table {
+    font-size: 0.6rem;
+    letter-spacing: 0.02em;
+    border-collapse: collapse;
+    width: 100%;
+  }
 ---
 
 <!-- _class: invert -->
 
-# An introduction to _**Direct Style**_ _Effect Management_ in Scala 3
+# _**Direct Style**_ _Effect Management_ in Scala 3
 
 ## Taming effects with **Capabilities**
 
@@ -116,7 +132,7 @@ val total  = calculateTotal(orders)
 total
 ```
 
-**Way** easier to write and reason about!
+Way easier to write and reason about!
 
 </div>
 </div>
@@ -124,19 +140,20 @@ total
 ---
 
 <!-- _class: invert -->
+<div class="center-list">
 
-### Can we get the advantages Monads give us in terms of effect management using _Direct Style_ rather than _Monadic Style_?
+### Can we get the benefits Monads give us in terms of effect management using _Direct Style_ rather than _Monadic Style_?
+
+* ### **Yes (we will\*)!**
+
+<br>
+
+  * \* some limitations are still being worked on
+
+</div>
 
 ---
 
-<!--
-### Can we get the advantages Monads give us in terms of effect management using _Direct Style_ rather than _Monadic Style_?
-
-### **Yes, we can!**
-
-(with some caveats and major limitations that will be discussed later)
-
---- -->
 <!-- 
 Two ingredients are needed:
 
@@ -147,7 +164,7 @@ Two ingredients are needed:
 
 ### Boundary & Break
 
-Boundary & break is a mechanism allowing to prematurely break the computation returning a value to the client. From Scala 3.2 onwards, non-local returns are no longer supported and `boundary` and `boundary.break` should be used instead.
+Boundary & break is a mechanism allowing to prematurely break the computation returning a value to the client. From Scala 3.2 onwards, non-local returns are no longer supported and `boundary` and `break` should be used instead.
 
 Using non-local returns:
 
@@ -177,7 +194,7 @@ def findFirstMatchingPair[T](list1: List[T], list2: List[T])(predicate: (T, T) =
 ### Context Functions
 
 - `break` is a method requiring a `Label[T]` context;
-- `boundary` enriches the `body` with a `Label[T]` via a **context function**, i.e. a function of the form `(T1, ..., Tn) ?=> E` where `T1, ..., Tn` instances are available as _givens_ in `E`. Their values can be `summon`ed or are available as a _contextual argument_:
+- `boundary` enriches the `body` with a `Label[T]` via a **context function**, i.e. a function of the form <br> `(T1, ..., Tn) ?=> E` where `T1, ..., Tn` instances are available as _givens_ in `E`. Their values can be `summon`ed or are available as a _contextual argument_:
 
 ```scala
 package scala.util
@@ -188,9 +205,7 @@ object boundary:
 
   def break[T](value: T)(using label: Label[T]): Nothing = ...
 
-
-// Explicit syntax (just for clarity)
-
+// Explicit desugared version using a contextual argument
 boundary: (label: Label[Option[(T, T)]]) ?=>
   for i <- list1 do
     for j <- list2 do
@@ -200,14 +215,14 @@ boundary: (label: Label[Option[(T, T)]]) ?=>
 
 ---
 
-Using `boundary` and `break` it is possible to implement data types to handle errors "directly" with a short exit path.
+By using `boundary` and `break` it is possible to implement data types to handle errors "directly" with a short exit path more easily than with monads.
 
 ```scala
-def aggregate(xs: List[Uri]): Either[String, List[String]] = 
+def aggregate(xs: List[Uri]): Either[Error, List[Response]] = 
   either: // boundary
     xs.map(doRequest(_).?) // `?` break if `doRequest` returns a `Left`, otherwise unwrap the `Right`
 
-def doRequest(endpoint: Uri): Either[String, String] =
+def doRequest(endpoint: Uri): Either[Error, Response] =
   HttpClientSyncBackend().send(basicRequest.get(endpoint)).body
 ```
 
@@ -217,7 +232,7 @@ def doRequest(endpoint: Uri): Either[String, String] =
 Using monadic style:
 
 ```scala
-  def aggregate(xs: List[Uri]): Either[String, List[String]] =
+  def aggregate(xs: List[Uri]): Either[Error, List[Response]] =
     xs.foldLeft[Either[String, List[String]]](Right(List.empty)): 
       (acc, uri) =>
         for
@@ -232,7 +247,7 @@ Using monadic style:
 Could be simplified using Cats `traverse`, yet there remains considerable complexity behind it...
 
 ```scala
-  def aggregate(xs: List[Uri]): Either[String, List[String]] =
+  def aggregate(xs: List[Uri]): Either[Error, List[Response]] =
     import cats.implicits.toTraverseOps
     // "Given a function which returns a G effect, thread 
     // this effect through the running of this function on 
@@ -271,7 +286,7 @@ def paymentData(id: UserId) = either:
   (user, address)
 ```
 
-This is a simple example of _effect_ management using direct style where the _effect_ is the possibility of _failing_.
+This is a simple example of _effect_ management in direct style, where the _effect_ is the possibility of _failure_.
 
 ---
 
@@ -290,7 +305,7 @@ For example, `CanFail` is the capability enabling the effect of breaking in case
 def f(using CanFail): Int = ...
 ```
 
-Marking with `using CanFail` the function make explicit that the function may fail and require to be called in a context where the `CanFail` capability is available. If the function is called without the capability, the compiler will raise an error.
+Marking with `using CanFail` the function make explicit the function may fail and require to be called in a context where the `CanFail` capability is available. If the function is called without the capability, the compiler will raise an error.
 
 ---
 
@@ -366,7 +381,7 @@ As part of the CAPRESE research project, the [Gears]() library has been develope
   def blocking[T](body: Async.Spawn ?=> T)
   ```
 
-  $\Rightarrow$ Capabilities are hierarchical
+  $\Rightarrow$ **Capabilities form a hierarchical structure.**
 
 ---
 
@@ -392,7 +407,7 @@ trait PostsService:
 
 ---
 
-Concrete service implementation:
+<div class="smaller">
 
 ```scala
 class PostsServiceImpl extends PostsService:
@@ -412,36 +427,148 @@ class PostsServiceImpl extends PostsService:
   private def verifyContent(title: Title, body: Body)(using Async): PostContent = ...
 ```
 
-- `authorBy` and `verifyContent` are executed concurrently - the concurrent execution is explicit opted-in by using a Gears `Future`;
-- `Future`s can be _composed_ and _awaited_ for their result;
-- **Structured concurrenct model**: every `Async` context has a completion group tracking all computations in a tree structure guaranteeing that when a group terminates all its dangling children are canceled.
+* `authorBy` and `verifyContent` are executed concurrently - the concurrent execution is explicit opted-in by using a Gears `Future`;
+* **Structured concurrenct model**: every `Async` context has a completion group tracking all computations in a tree structure guaranteeing that when a group terminates all its dangling children are canceled.
+* `Future`s can be _composed_ and _awaited_ for their result;
+  -  `zip` operator allows combining the results of two `Future`s in a pair if both succeed, or fail with the first error encountered. Combined with `Async.group` the failure of one determines the cancellation of the other because the cancellation group is shared and once the `zip` completes the group is terminated.
+
+</div>
 
 ---
 
-<!-- _paginate: hold -->
+A comparison
 
-Concrete service implementation:
+| Feature | Gears Futures | Scala monadic Futures |
+|:--------|:--------------|:----------------------|
+| Structured concurrency | ✅ | ❌ |
+| Cancellation support | ✅ | ❌ |
+| Concurrency | By default, sequential | By default, concurrent |
+| Referential transparency | ⚠ `Future`'s aren't, but `Task`s are delayed referential transparent `Future`s | ❌ |
+
+Other notable features of Gears (here not covered):
+
+- other composition operators, like `or`, `orWithCancel`;
+- `Channel`s for communication between concurrent computations;
+
+<div class="smaller">
+
+You can find a detailed insight and some examples [here](https://tassiluca.github.io/direct-style-experiments/).
+
+</div>
+
+---
+
+#### Capabilities leakage problem
+
+`IO` capability to manage input/output operations:
 
 ```scala
-class PostsServiceImpl extends PostsService:
+/** The capability enabling writing and reading from a source. */
+trait IO:
+  /** IO Write effect operation. */
+  def write(content: String)(using CanFail): Unit
+  /** IO read effect operation. */
+  def read[T](f: Iterator[String] => T)(using CanFail): T
 
-  override def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post =
-    if context.repository.exists(title) then fail(s"A post entitled $title already exists")
-    val (post, author) = Async.group:
-      val content = Future(verifyContent(title, body))
-      val author = Future(authorBy(authorId))
-      content.zip(author).awaitResult.?
-    context.repository.save(Post(author, post._1, post._2, Date()))
+object IO:
 
-  /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
-  private def authorBy(id: AuthorId)(using Async): Author = ...
+  def write(x: String)(using IO, CanFail): Unit = summon[IO].write(x)
+  def read[T](f: Iterator[String] => T)(using IO, CanFail): T = summon[IO].read(f)
 
-  /* Some local computation that verifies the content of the post is appropriate. */
-  private def verifyContent(title: Title, body: Body)(using Async): PostContent = ...
+  /** File IO capability generator. */
+  def file[R](path: Path)(body: IO ?=> R): Runnable[R] = () =>
+    given IO with // effect handler
+      def write(content: String)(using CanFail): Unit =
+        Using(PrintWriter(path.toFile)): writer =>
+          writer.write(content)
+        .?
+      def read[T](f: Iterator[String] => T)(using CanFail): T =
+        Using(Source.fromFile(path.toFile)): source =>
+          f(source.getLines())
+        .?
+    body
 ```
 
-- `Future`s can be _composed_ and _awaited_ for their result;
-  -  `zip` operator allows combining the results of two `Future`s in a pair if both succeed, or fail with the first error encountered. Combined with `Async.group` the failure of one determines the cancellation of the other because the cancellation group is shared and once the `zip` completes the group is terminated (thus cancelling the other computation).
-  Note: the only way `authorBy` and `verifyContent` can fail, making the `zip` return immediately the failure is by throwing an exception!
+---
+
+**Problem**:
+
+```scala
+@main def breakingIO = either:
+  val path = Path.of("test.txt")
+  // The file lines are returned as an iterator; no lines are read at this point...
+  val eff: Runnable[Iterator[String]] = IO.file(path):
+    read(identity)
+  // ...when we try to execute the effect, the lines are read but the stream is already closed!
+  val content = eff.run().next() // throws "IOException: Stream Already Closed"!!!
+  println(content)
+```
+
+- the `IO.file` body returns an `Iterator[String]` that is lazily evaluated
+  - _Consequence_: the lines are read only after the file has been closed, which results in an `IOException` being thrown;
+  - the same happens if, for example, a lambda is returned, as shown here:
+    ```scala
+    IO.file(path):
+      () => read(_.mkString)
+    ```
+- **No compilation error** is raised, the error is raised only at runtime!
 
 ---
+
+### Capture checking
+
+To solve this issue `IO` needs to be marked as a _capability_ and the return type of the `file` method must keep track of the capability lifetime by using a **capturing type** of the form:
+
+`T^{cap1, cap2, ..., capN}` 
+
+where `T` is a regular type and `{cap1, cap2, ..., capN}` is called **capture set** and it represents the set of capabilities that the type `T` can capture or reference.
+
+- if the capture set is empty the type is **pure**, otherwise it is considered **impure**;
+- `cap` is the **universal capability** which is the most sweeping capability from which all other capabilities are derived;
+- When a class `C` extends the `Capability` trait, it is the same as if the type of `C` is `C^{cap}`
+
+```scala
+trait IO extends Capability:
+  def write(content: String)(using CanFail): Unit
+  def read[T](f: Iterator[String] => T)(using CanFail): T
+
+object IO:
+  def file[R](path: Path)(body: IO ?=> R): Runnable[R]^{body} = /* same as before */
+```
+
+---
+
+Now, the compiler recognize we are trying to assign to the type variable `R` a capturing type carrying the universal capability, which is forbidden and a compilation error is raised:
+
+```scala
+@main def breakingIO = either:
+  val path = Path.of("test.txt")
+  val eff = IO.file(path):
+    () => read(_.mkString)
+  //~~~~~~~~~~~~~~~~~~~~~~
+  // Compilation error: local reference IO leaks into outer capture 
+  // set of type parameter R of method file in object IO
+  val content = eff.run()
+```
+
+However, in some cases, the compiler is still unable to detect the leakage of capabilities. For instance, in the example above, where an `Iterator[String]` is returned. The Scala 3 standard library has not yet been fully covered by the capture checking mechanism.
+
+---
+
+### Recap
+
+* Direct style frameworks are simpler to use and reason about than monadic style;
+* It is possible to manage effects in direct style using **capabilities**, like `CanFail`, `CanThrow`, `IO`, `Async`, etc;
+  - Gears is an experimental library that allows to model the suspension effect in direct style providing continuation-based structured concurrency;
+* **Capture checking** is needed to ensure that the capabilities are not leaked outside the scope where they should be used.
+  - Type system will distinguish between _pure_ and _impure_ types, where impure types can capture capabilities, while pure types cannot.
+  - Currently, capture checking has been already applied to parts of the Standard Library and the Scala 3 compiler. The Caprese project is working to extend this feature to the whole Scala 3 ecosystem.
+
+---
+
+### References
+
+- [Martin Odersky, Aleksander Boruch-Gruszecki, Edward Lee, Jonathan Brachthäuser, Ondřej Lhoták, Scoped Capabilities for Polymorphic Effects](https://arxiv.org/abs/2207.03402)
+- [Gears project library](https://github.com/lampepfl/gears)
+- [Capture checking](https://dotty.epfl.ch/docs/reference/experimental/cc.html)
+- [`CanThrow` capability](https://dotty.epfl.ch/docs/reference/experimental/canthrow.html)

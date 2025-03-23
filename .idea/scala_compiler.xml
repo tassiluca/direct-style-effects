@@ -5,8 +5,7 @@
     <profile name="sbt 2" modules="asmd-24-direct-style">
       <parameters>
         <parameter value="-explain" />
-        <parameter value="-Xprint:cc" />
-        <parameter value="-Ycc-debug" />
+        <parameter value="-experimental" />
       </parameters>
     </profile>
   </component>
