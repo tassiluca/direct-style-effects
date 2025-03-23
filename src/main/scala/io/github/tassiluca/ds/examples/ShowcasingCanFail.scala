@@ -1,10 +1,9 @@
 package io.github.tassiluca.ds.examples
 
-import io.github.tassiluca.ds.effects.{CanFail, either}
 import io.github.tassiluca.ds.effects.either.fail
+import io.github.tassiluca.ds.effects.{CanFail, either}
 
-import scala.util.boundary
-import scala.util.boundary.{Label, break}
+import scala.util.boundary.Label
 
 trait ShowcasingCanFail:
 

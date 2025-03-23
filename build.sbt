@@ -6,7 +6,7 @@ ThisBuild / scalaVersion     := scala
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.example"
 ThisBuild / organizationName := "example"
-ThisBuild / scalacOptions    ++= Seq("-explain", "-Xprint:cc", "-Ycc-debug")
+ThisBuild / scalacOptions    ++= Seq("-explain", /*"-Xprint:cc", "-Ycc-debug"*/)
 
 lazy val root = (project in file("."))
   .settings(
