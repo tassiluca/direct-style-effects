@@ -1,0 +1,12 @@
+classDiagram
+  class Async {
+    << capability >>
+    +await[T](src: Async.Source[T]) T
+  }
+  note for Async "The capability allowing to suspend the current computation"
+
+  class `Async.Spawn` {
+    << capability >>
+  }
+  Async <|-- `Async.Spawn`
+  note for Async.Spawn "The capability to spawn a concurrent job"

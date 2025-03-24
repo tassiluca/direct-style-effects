@@ -99,6 +99,12 @@ style: |
 
 Luca Tassinari
 
+<div class="smaller">
+
+25/03/2025
+
+</div>
+
 ---
 
 ## What **Direct Style** is?
@@ -148,19 +154,11 @@ Way easier to write and reason about!
 
 <br>
 
-  * \* some limitations are still being worked on
+  * \* some limitations are still being addressed
 
 </div>
 
 ---
-
-<!-- 
-Two ingredients are needed:
-
-1. **Context functions**, a.k.a. `?=>`
-2. **`boundary`** & **`break`**
-
---- -->
 
 ### Boundary & Break
 
@@ -194,7 +192,7 @@ def findFirstMatchingPair[T](list1: List[T], list2: List[T])(predicate: (T, T) =
 ### Context Functions
 
 - `break` is a method requiring a `Label[T]` context;
-- `boundary` enriches the `body` with a `Label[T]` via a **context function**, i.e. a function of the form <br> `(T1, ..., Tn) ?=> E` where `T1, ..., Tn` instances are available as _givens_ in `E`. Their values can be `summon`ed or are available as a _contextual argument_:
+- `boundary` enriches the `body` with a `Label[T]` via a **context function**, i.e., a function of the form <br> `(T1, ..., Tn) ?=> E` where `T1, ..., Tn` instances are available as _givens_ in `E`. Their values can be summoned or are available as a _contextual argument_:
 
 ```scala
 package scala.util
@@ -305,7 +303,7 @@ For example, `CanFail` is the capability enabling the effect of breaking in case
 def f(using CanFail): Int = ...
 ```
 
-Marking with `using CanFail` the function make explicit the function may fail and require to be called in a context where the `CanFail` capability is available. If the function is called without the capability, the compiler will raise an error.
+Marking a function with `CanFail` explicitly indicates that the function may fail and must be called in a context where the `CanFail` capability is available. If the function is called without the capability, the compiler will raise an error.
 
 ---
 
@@ -368,20 +366,36 @@ div(10, 0)
 
 #### The suspension effect
 
-As part of the CAPRESE research project, the [Gears]() library has been developed with the goal of providing an experimental tool for _asynchronous programming_, leveraging capabilities to model, in direct style, one of the most important effects: **suspension**.
+As part of the CAPRESE project, the [Gears]() library has been developed with the goal of providing support for _asynchronous programming_, leveraging capabilities to model, in direct style the **suspension** effect.
+
+  ![h:300](./res/cap-hierarchy.svg)
+
 
 - `Async` is the capability allowing a computation to suspend while waiting for the result of an asynchronous source.
-  - `Async.group` is the `Async` capability generator
-    ```scala
-    def group[T](body: Async ?=> T)
-    ```
 - `Async.Spawn` is a special subtype of `Async` (`Async.Spawn <: Async`) that allows to spawn a new concurrent asynchronous computation.
-  - `Async.blocking` is the root capability generator that creates an `Async.Sapwn` context blocking the running thread for suspension (usually placed inside the `main` or for testing purposes);
-  ```scala
-  def blocking[T](body: Async.Spawn ?=> T)
-  ```
-
+  
   $\Rightarrow$ **Capabilities form a hierarchical structure.**
+
+---
+
+You can get the `Async` and `Async.Spawn` capabilities via:
+
+- `Async.blocking` 
+  - is the root capability generator;
+  - it executes asynchronous computation `body` on currently running thread. The thread will suspend when the computation waits;
+  - usually placed inside the `main` or for testing purposes;
+
+```scala
+def blocking[T](body: Async.Spawn ?=> T): T
+```
+
+- `Async.group`: runs `body` inside a spawnable context where it is allowed to spawn concurrently runnable Futures. It requires an implicit `Async` instance to be in scope;
+
+```scala
+def group[T](body: Async.Spawn ?=> T)(using Async): T
+```
+
+Gears supports both JVM and Native platforms: on the JVM, it is built on top of Virtual Threads, and on Scala Native, it leverages delimited continuations.
 
 ---
 
@@ -403,7 +417,7 @@ trait PostsService:
 - `Async` capability allows methods to suspend while waiting for the result;
 - `CanFail` capability allows methods to break the computation returning an error message in case of failure.
 
-  $\Rightarrow$ Composing effects with capabilities is straightforward: just add the required capabilities to the method signature.
+  $\Rightarrow$ **Composing effects with capabilities is straightforward**: just add the required capabilities to the method signature.
 
 ---
 
@@ -428,7 +442,7 @@ class PostsServiceImpl extends PostsService:
 ```
 
 * `authorBy` and `verifyContent` are executed concurrently - the concurrent execution is explicit opted-in by using a Gears `Future`;
-* **Structured concurrenct model**: every `Async` context has a completion group tracking all computations in a tree structure guaranteeing that when a group terminates all its dangling children are canceled.
+* **Structured concurrency model**: every `Async` context has a completion group tracking all computations in a tree structure guaranteeing that when a group terminates all its dangling children are canceled.
 * `Future`s can be _composed_ and _awaited_ for their result;
   -  `zip` operator allows combining the results of two `Future`s in a pair if both succeed, or fail with the first error encountered. Combined with `Async.group` the failure of one determines the cancellation of the other because the cancellation group is shared and once the `zip` completes the group is terminated.
 
@@ -442,12 +456,12 @@ A comparison
 |:--------|:--------------|:----------------------|
 | Structured concurrency | ✅ | ❌ |
 | Cancellation support | ✅ | ❌ |
-| Concurrency | By default, sequential | By default, concurrent |
-| Referential transparency | ⚠ `Future`'s aren't, but `Task`s are delayed referential transparent `Future`s | ❌ |
+| Referential transparency | ⚠ `Future`'s aren't, but `Task`s are delayed referential transparent `Future`s. | ❌ Once declared, they are spawned. |
+| Concurrency model | By default the code is serial. If you want to opt-in concurrency you have to explicitly use a Future or Task. | By default, the code is concurrent. |
 
 Other notable features of Gears (here not covered):
 
-- other composition operators, like `or`, `orWithCancel`;
+- other composition operators, like `or`, `orWithCancel`, `awaitAll`;
 - `Channel`s for communication between concurrent computations;
 
 <div class="smaller">
@@ -515,6 +529,15 @@ object IO:
 
 ---
 
+<!--
+
+The idea to solve this issue is that the Scala type system needs to be updated to keep track of capabilities lifetime and this is done by what is called **capture checking**, which is essentially a new phase of the scala type checker that
+leverage on new capturing types to catch the leakage of capabilities.
+
+A capturing type is of the form...
+
+-->
+
 ### Capture checking
 
 To solve this issue `IO` needs to be marked as a _capability_ and the return type of the `file` method must keep track of the capability lifetime by using a **capturing type** of the form:
@@ -538,7 +561,7 @@ object IO:
 
 ---
 
-Now, the compiler recognize we are trying to assign to the type variable `R` a capturing type carrying the universal capability, which is forbidden and a compilation error is raised:
+Now, the compiler recognizes we are trying to assign to the type variable `R` a capturing type carrying the universal capability, which is forbidden and a compilation error is raised:
 
 ```scala
 @main def breakingIO = either:
@@ -560,7 +583,7 @@ However, in some cases, the compiler is still unable to detect the leakage of ca
 * Direct style frameworks are simpler to use and reason about than monadic style;
 * It is possible to manage effects in direct style using **capabilities**, like `CanFail`, `CanThrow`, `IO`, `Async`, etc;
   - Gears is an experimental library that allows to model the suspension effect in direct style providing continuation-based structured concurrency;
-* **Capture checking** is needed to ensure that the capabilities are not leaked outside the scope where they should be used.
+* **Capture checking** is needed to ensure that the capabilities are not leaked outside the scope where they are intended to be used.
   - Type system will distinguish between _pure_ and _impure_ types, where impure types can capture capabilities, while pure types cannot.
   - Currently, capture checking has been already applied to parts of the Standard Library and the Scala 3 compiler. The Caprese project is working to extend this feature to the whole Scala 3 ecosystem.
 
