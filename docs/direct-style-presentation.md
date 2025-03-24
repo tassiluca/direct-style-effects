@@ -129,7 +129,7 @@ yield total
 
 #### Direct Style
 
-The control flow of the program is *explicit* and the program is written as a sequence of instructions that are executed one after the other:
+The control flow of the program is *explicit* and the program is written as a sequence of instructions that are executed one after the other, resembling imperative code, while still being in a _functional framework_ (with all its benefits):
 
 ```scala
 val user   = fetchUser(id)
@@ -290,7 +290,7 @@ This is a simple example of _effect_ management in direct style, where the _effe
 
 ### Modeling effects with capabilities
 
-CAPabilities for RESources and Effects (CAPRESE) is the ongoing research project at the Programming Methods Laboratory @ EPFL whose goal is to _upgrade_ the _Scala type system_ to _track effects_ directly in the program, without pushing them into external (monadic) frameworks.
+[CAPabilities for RESources and Effects (CAPRESE) &#x2197;](https://abgruszecki.github.io/publication/capturing-types/capturing-types.pdf) is the ongoing research project at the Programming Methods Laboratory @ EPFL whose goal is to _upgrade_ the _Scala type system_ to _track effects_ directly in the program, without pushing them into external (monadic) frameworks.
 
 _Idea_:
 
@@ -337,7 +337,7 @@ object either:
 
 ---
 
-Similarly to `CanFail`, the **`CanThrow` capability** is available as an experimental feature to manage in an effectful way the possibility of throwing exceptions.
+Similarly to `CanFail`, the **`CanThrow` capability** is available as an _experimental_ feature to manage in an effectful way the possibility of throwing exceptions.
 
 ```scala
 // CanThrow capability is an experimental feature and can be enabled with the following import
@@ -362,11 +362,13 @@ div(10, 0)
 // Error: The capability to throw exception is missing.
 ```
 
+The `CanThrow` capability behaves similarly to Java checked exceptions, but it is more flexible, allowing them to be thrown in higher-order functions.
+
 ---
 
 #### The suspension effect
 
-As part of the CAPRESE project, the [Gears]() library has been developed with the goal of providing support for _asynchronous programming_, leveraging capabilities to model, in direct style the **suspension** effect.
+As part of the CAPRESE project, the [Gears &#x2197;](https://github.com/lampepfl/gears) library has been developed with the goal of providing support for _asynchronous programming_, leveraging capabilities to model, in direct style the **suspension** effect.
 
   ![h:300](./res/cap-hierarchy.svg)
 
@@ -466,7 +468,7 @@ Other notable features of Gears (here not covered):
 
 <div class="smaller">
 
-You can find a detailed insight and some examples [here](https://tassiluca.github.io/direct-style-experiments/).
+You can find a detailed insight and some examples [here &#x2197;](https://tassiluca.github.io/direct-style-experiments/).
 
 </div>
 

@@ -372,7 +372,7 @@ table {
 </div>
 <div>
 <h4 id="direct-style">Direct Style</h4>
-<p>The control flow of the program is <em>explicit</em> and the program is written as a sequence of instructions that are executed one after the other:</p>
+<p>The control flow of the program is <em>explicit</em> and the program is written as a sequence of instructions that are executed one after the other, resembling imperative code, while still being in a <em>functional framework</em> (with all its benefits):</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-keyword">val</span> user   = fetchUser(id)
 <span class="hljs-keyword">val</span> orders = fetchOrders(user)
 <span class="hljs-keyword">val</span> total  = calculateTotal(orders)
@@ -1525,7 +1525,7 @@ table {
 }
 ;" data-marpit-pagination-total="21">
 <h3 id="modeling-effects-with-capabilities">Modeling effects with capabilities</h3>
-<p>CAPabilities for RESources and Effects (CAPRESE) is the ongoing research project at the Programming Methods Laboratory @ EPFL whose goal is to <em>upgrade</em> the <em>Scala type system</em> to <em>track effects</em> directly in the program, without pushing them into external (monadic) frameworks.</p>
+<p><a href="https://abgruszecki.github.io/publication/capturing-types/capturing-types.pdf">CAPabilities for RESources and Effects (CAPRESE) ↗</a> is the ongoing research project at the Programming Methods Laboratory @ EPFL whose goal is to <em>upgrade</em> the <em>Scala type system</em> to <em>track effects</em> directly in the program, without pushing them into external (monadic) frameworks.</p>
 <p><em>Idea</em>:</p>
 <ul>
 <li>to have an <em><strong>effect</strong></em> you need the <em><strong>capability</strong></em> enabling it;</li>
@@ -1906,7 +1906,7 @@ table {
   width: 100%;
 }
 ;" data-marpit-pagination-total="21">
-<p>Similarly to <code>CanFail</code>, the <strong><code>CanThrow</code> capability</strong> is available as an experimental feature to manage in an effectful way the possibility of throwing exceptions.</p>
+<p>Similarly to <code>CanFail</code>, the <strong><code>CanThrow</code> capability</strong> is available as an <em>experimental</em> feature to manage in an effectful way the possibility of throwing exceptions.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-comment">// CanThrow capability is an experimental feature and can be enabled with the following import</span>
 <span class="hljs-keyword">import</span> language.experimental.saferExceptions
 
@@ -1928,6 +1928,7 @@ div(<span class="hljs-number">10</span>, <span class="hljs-number">0</span>)
 <span class="hljs-comment">//      ^^^</span>
 <span class="hljs-comment">// Error: The capability to throw exception is missing.</span>
 </code></pre>
+<p>The <code>CanThrow</code> capability behaves similarly to Java checked exceptions, but it is more flexible, allowing them to be thrown in higher-order functions.</p>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-footer="Scala 3 Direct Style Effect Management" data-paginate="true" data-theme="uncover" data-style="h1 { font-size: 1.6rem; }
@@ -2102,7 +2103,7 @@ table {
 }
 ;" data-marpit-pagination-total="21">
 <h4 id="the-suspension-effect">The suspension effect</h4>
-<p>As part of the CAPRESE project, the <a href="">Gears</a> library has been developed with the goal of providing support for <em>asynchronous programming</em>, leveraging capabilities to model, in direct style the <strong>suspension</strong> effect.</p>
+<p>As part of the CAPRESE project, the <a href="https://github.com/lampepfl/gears">Gears ↗</a> library has been developed with the goal of providing support for <em>asynchronous programming</em>, leveraging capabilities to model, in direct style the <strong>suspension</strong> effect.</p>
 <p><img src="./res/cap-hierarchy.svg" alt="" style="height:300px;" /></p>
 <ul>
 <li>
@@ -2892,24 +2893,24 @@ table {
 <td style="text-align:left"><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" data-marp-twemoji=""/></td>
 </tr>
 <tr>
-<td style="text-align:left">Concurrency</td>
-<td style="text-align:left">By default, sequential</td>
-<td style="text-align:left">By default, concurrent</td>
+<td style="text-align:left">Referential transparency</td>
+<td style="text-align:left"><img class="emoji" draggable="false" alt="⚠" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" data-marp-twemoji=""/> <code>Future</code>'s aren't, but <code>Task</code>s are delayed referential transparent <code>Future</code>s.</td>
+<td style="text-align:left"><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" data-marp-twemoji=""/> Once declared, they are spawned.</td>
 </tr>
 <tr>
-<td style="text-align:left">Referential transparency</td>
-<td style="text-align:left"><img class="emoji" draggable="false" alt="⚠" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" data-marp-twemoji=""/> <code>Future</code>'s aren't, but <code>Task</code>s are delayed referential transparent <code>Future</code>s</td>
-<td style="text-align:left"><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" data-marp-twemoji=""/></td>
+<td style="text-align:left">Concurrency model</td>
+<td style="text-align:left">By default the code is serial. If you want to opt-in concurrency you have to explicitly use a Future or Task.</td>
+<td style="text-align:left">By default, the code is concurrent.</td>
 </tr>
 </tbody>
 </table>
 <p>Other notable features of Gears (here not covered):</p>
 <ul>
-<li>other composition operators, like <code>or</code>, <code>orWithCancel</code>;</li>
+<li>other composition operators, like <code>or</code>, <code>orWithCancel</code>, <code>awaitAll</code>;</li>
 <li><code>Channel</code>s for communication between concurrent computations;</li>
 </ul>
 <div class="smaller">
-<p>You can find a detailed insight and some examples <a href="https://tassiluca.github.io/direct-style-experiments/">here</a>.</p>
+<p>You can find a detailed insight and some examples <a href="https://tassiluca.github.io/direct-style-experiments/">here ↗</a>.</p>
 </div>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
