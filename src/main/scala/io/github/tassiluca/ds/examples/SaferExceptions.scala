@@ -10,15 +10,10 @@ object SaferExceptions extends App:
   class DivisionByZero extends Exception
 
   // Or equivalently:
-  //    def div(n: Int, m: Int): Int throws DivisionByZero
+  // def div(n: Int, m: Int): Int throws DivisionByZero
   def div(n: Int, m: Int)(using CanThrow[DivisionByZero]): Int = m match
     case 0 => throw DivisionByZero()
     case _ => n / m
-
-  class ValidationError(msg: String) extends Exception(msg)
-
-  def requireAllPositive(xs: List[Int]): List[Int] throws ValidationError =
-    xs.map(x => if x >= 0 then x else throw ValidationError(s"$x does not satisfy the positive requirement"))
 
   println:
     try
@@ -30,12 +25,18 @@ object SaferExceptions extends App:
   // println:
   //   div(10, 1) // ERROR! Missing CanThrow[DivisionByZero] capability
 
+  // Differently from Java we can throw checked exceptions inside higher-order functions
+  val values = (10, 1) :: (5, 2) :: (4, 2) :: (5, 0) :: Nil
+  println:
+    try values.map(div) // map is the regular List.map implementation!
+    catch case _: DivisionByZero => "Division by zero"
+
+  class ValidationError(msg: String) extends Exception(msg)
+
+  def requireAllPositive(xs: List[Int]): List[Int] throws ValidationError =
+    xs.map(x => if x >= 0 then x else throw ValidationError(s"$x does not satisfy the positive requirement"))
+
   println:
     try
       requireAllPositive(1 :: 10 :: -10 :: Nil)
     catch case e: ValidationError => s"Validation error: ${e.getMessage}"
-
-//  val values = (10, 1) :: (5, 2) :: (4, 2) :: (5, 1) :: Nil
-//  println:
-//    try values.map(div) // map is the regular List.map implementation!
-//    catch case _: DivisionByZero => "Division by zero"

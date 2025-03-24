@@ -8,7 +8,7 @@ import java.io.PrintWriter
 import java.nio.file.Path
 import scala.annotation.experimental
 import scala.io.Source
-import scala.util.Using
+import scala.util.{Try, Using}
 
 /** **Unsafe IO capability**. See [[io.github.tassiluca.ds.typecheck.IO]] for a type-safe version. */
 trait IO:
@@ -25,8 +25,8 @@ object IO:
   /** Capability generator for console-based IO. */
   def console[R](body: IO ?=> R): Runnable[R] = () =>
     given IO with // actual effect handler
-      def write(content: String)(using CanFail): Unit = Console.println(content)
-      def read[T](f: Iterator[String] => T)(using CanFail): T = f(scala.io.StdIn.readLine.linesIterator)
+      def write(content: String)(using CanFail): Unit = println(content)
+      def read[T](f: Iterator[String] => T)(using CanFail): T = Try(f(scala.io.StdIn.readLine.linesIterator)).?
     body
 
   /** Capability generator for file-based IO. */
@@ -76,5 +76,4 @@ import IO.*
     write("Let's break the IO capability / 2!")
     read(l => () => l.mkString)
   val result = laterEff.run()
-  println:
-    result()
+  println(result())

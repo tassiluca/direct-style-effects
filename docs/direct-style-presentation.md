@@ -525,7 +525,7 @@ object IO:
   - the same happens if, for example, a lambda is returned, as shown here:
     ```scala
     IO.file(path):
-      () => read(_.mkString)
+      read(() => _.mkString)
     ```
 - **No compilation error** is raised, the error is raised only at runtime!
 
@@ -549,13 +549,13 @@ To solve this issue `IO` needs to be marked as a _capability_ and the return typ
 where `T` is a regular type and `{cap1, cap2, ..., capN}` is called **capture set** and it represents the set of capabilities that the type `T` can capture or reference.
 
 - if the capture set is empty the type is **pure**, otherwise it is considered **impure**;
-- `cap` is the **universal capability** which is the most sweeping capability from which all other capabilities are derived;
+- `cap` is the **universal capability** which is the most sweeping capability from which all other capabilities are derived. `T^{cap}` can be abbreviated as `T^`.;
 - When a class `C` extends the `Capability` trait, it is the same as if the type of `C` is `C^{cap}`
 
 ```scala
 trait IO extends Capability:
   def write(content: String)(using CanFail): Unit
-  def read[T](f: Iterator[String] => T)(using CanFail): T
+  def read[T](f: Iterator[String]^ => T)(using CanFail): T
 
 object IO:
   def file[R](path: Path)(body: IO ?=> R): Runnable[R]^{body} = /* same as before */
@@ -563,20 +563,24 @@ object IO:
 
 ---
 
-Now, the compiler recognizes we are trying to assign to the type variable `R` a capturing type carrying the universal capability, which is forbidden and a compilation error is raised:
+Now, the compiler recognizes the leakage of the capabilities outside the intended scope and raises an error:
 
 ```scala
 @main def breakingIO = either:
   val path = Path.of("test.txt")
   val eff = IO.file(path):
-    () => read(_.mkString)
-  //~~~~~~~~~~~~~~~~~~~~~~
-  // Compilation error: local reference IO leaks into outer capture 
-  // set of type parameter R of method file in object IO
+    write("Hello, World from IO capability!") // ok!
+    read(_.mkString) // ok!
+
+    read(l => l) //, or equivalently: read(identity)
+    // ^^^^^^^^^
+    // local reference l leaks into outer capture set of type parameter T of method read in object IO
+
+    () => write("Hello, World from IO capability!")
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // local reference IO leaks into outer capture set of type parameter R of method file in object IO
   val content = eff.run()
 ```
-
-However, in some cases, the compiler is still unable to detect the leakage of capabilities. For instance, in the example above, where an `Iterator[String]` is returned. The Scala 3 standard library has not yet been fully covered by the capture checking mechanism.
 
 ---
 
