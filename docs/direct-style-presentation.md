@@ -582,10 +582,10 @@ However, in some cases, the compiler is still unable to detect the leakage of ca
 
 ### Recap
 
-* Direct style frameworks are simpler to use and reason about than monadic style;
-* It is possible to manage effects in direct style using **capabilities**, like `CanFail`, `CanThrow`, `IO`, `Async`, etc;
+- Direct style frameworks are simpler to use and reason about than monadic style;
+- It is possible to manage effects in direct style using **capabilities**, like `CanFail`, `CanThrow`, `IO`, `Async`, etc;
   - Gears is an experimental library that allows to model the suspension effect in direct style providing continuation-based structured concurrency;
-* **Capture checking** is needed to ensure that the capabilities are not leaked outside the scope where they are intended to be used.
+- **Capture checking** is needed to ensure that the capabilities are not leaked outside the scope where they are intended to be used.
   - Type system will distinguish between _pure_ and _impure_ types, where impure types can capture capabilities, while pure types cannot.
   - Currently, capture checking has been already applied to parts of the Standard Library and the Scala 3 compiler. The Caprese project is working to extend this feature to the whole Scala 3 ecosystem.
 

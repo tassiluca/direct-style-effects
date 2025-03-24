@@ -3682,7 +3682,7 @@ table {
 <p>However, in some cases, the compiler is still unable to detect the leakage of capabilities. For instance, in the example above, where an <code>Iterator[String]</code> is returned. The Scala 3 standard library has not yet been fully covered by the capture checking mechanism.</p>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-marpit-fragments="3" data-footer="Scala 3 Direct Style Effect Management" data-paginate="true" data-theme="uncover" data-style="h1 { font-size: 1.6rem; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-footer="Scala 3 Direct Style Effect Management" data-paginate="true" data-theme="uncover" data-style="h1 { font-size: 1.6rem; }
 h2 { font-size: 1.3rem; }
 h3 { font-size: 1.1rem; margin-bottom: 0.2em; }
 h4 { font-size: 0.9rem; margin-bottom: 0.2em; }
@@ -3855,13 +3855,13 @@ table {
 ;" data-marpit-pagination-total="21">
 <h3 id="recap">Recap</h3>
 <ul>
-<li data-marpit-fragment="1">Direct style frameworks are simpler to use and reason about than monadic style;</li>
-<li data-marpit-fragment="2">It is possible to manage effects in direct style using <strong>capabilities</strong>, like <code>CanFail</code>, <code>CanThrow</code>, <code>IO</code>, <code>Async</code>, etc;
+<li>Direct style frameworks are simpler to use and reason about than monadic style;</li>
+<li>It is possible to manage effects in direct style using <strong>capabilities</strong>, like <code>CanFail</code>, <code>CanThrow</code>, <code>IO</code>, <code>Async</code>, etc;
 <ul>
 <li>Gears is an experimental library that allows to model the suspension effect in direct style providing continuation-based structured concurrency;</li>
 </ul>
 </li>
-<li data-marpit-fragment="3"><strong>Capture checking</strong> is needed to ensure that the capabilities are not leaked outside the scope where they are intended to be used.
+<li><strong>Capture checking</strong> is needed to ensure that the capabilities are not leaked outside the scope where they are intended to be used.
 <ul>
 <li>Type system will distinguish between <em>pure</em> and <em>impure</em> types, where impure types can capture capabilities, while pure types cannot.</li>
 <li>Currently, capture checking has been already applied to parts of the Standard Library and the Scala 3 compiler. The Caprese project is working to extend this feature to the whole Scala 3 ecosystem.</li>
