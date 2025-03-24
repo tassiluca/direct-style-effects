@@ -14,5 +14,6 @@ lazy val root = (project in file("."))
       "com.softwaremill.sttp.client3" %% "core" % "3.10.3",
       "org.typelevel" %% "cats-core" % "2.13.0",
       "org.scala-lang" %% "scala2-library-cc-tasty-experimental" % scala,
+      "org.scalatest" %% "scalatest" % "3.2.19" % "test",
     )
   )
