@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <profile name="sbt 1" modules="asmd-24-direct-style_5885" />
-    <profile name="sbt 2" modules="asmd-24-direct-style">
+    <profile name="sbt 2" modules="asmd-24-direct-style,direct-style-effects">
       <parameters>
         <parameter value="-explain" />
         <parameter value="-experimental" />

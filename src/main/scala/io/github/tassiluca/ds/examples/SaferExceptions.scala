@@ -15,6 +15,11 @@ object SaferExceptions extends App:
     case 0 => throw DivisionByZero()
     case _ => n / m
 
+  class ValidationError(msg: String) extends Exception(msg)
+
+  def requireAllPositive(xs: List[Int]): List[Int] throws ValidationError =
+    xs.map(x => if x >= 0 then x else throw ValidationError(s"$x does not satisfy the positive requirement"))
+
   println:
     try
       // the compiler generates an accumulated capability as follows:
@@ -25,7 +30,12 @@ object SaferExceptions extends App:
   // println:
   //   div(10, 1) // ERROR! Missing CanThrow[DivisionByZero] capability
 
-  val values = (10, 1) :: (5, 2) :: (4, 2) :: (5, 1) :: Nil
   println:
-    try values.map(div) // map is the regular List.map implementation!
-    catch case _: DivisionByZero => "Division by zero"
+    try
+      requireAllPositive(1 :: 10 :: -10 :: Nil)
+    catch case e: ValidationError => s"Validation error: ${e.getMessage}"
+
+//  val values = (10, 1) :: (5, 2) :: (4, 2) :: (5, 1) :: Nil
+//  println:
+//    try values.map(div) // map is the regular List.map implementation!
+//    catch case _: DivisionByZero => "Division by zero"

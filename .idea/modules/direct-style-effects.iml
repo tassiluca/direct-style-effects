@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module external.linked.project.id="root [file:/Users/lucatassi/Projects/asmd/asmd-24-direct-style/]" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
   <component name="DisplayModuleName">
-    <option name="name" value="asmd-24-direct-style" />
+    <option name="name" value="direct-style-effects" />
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_21">
     <output url="file://$MODULE_DIR$/../../target/scala-3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY/classes" />

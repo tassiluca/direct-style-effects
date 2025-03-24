@@ -1,16 +1,13 @@
-import Dependencies._
+import Dependencies.*
 
 val scala = "3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY"
 
 ThisBuild / scalaVersion     := scala
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.example"
-ThisBuild / organizationName := "example"
-ThisBuild / scalacOptions    ++= Seq("-explain", "-experimental" /*"-Xprint:cc", "-Ycc-debug"*/)
+ThisBuild / scalacOptions    ++= Seq("-explain", "-experimental")
 
 lazy val root = (project in file("."))
   .settings(
-    name := "asmd-24-direct-style",
+    name := "direct-style-effects",
     libraryDependencies ++= Seq(
       munit % Test,
       "ch.epfl.lamp" %% "gears" % "0.2.0",

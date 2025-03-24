@@ -10,25 +10,26 @@ import scala.annotation.experimental
 import scala.io.Source
 import scala.util.Using
 
+/** **Unsafe IO capability**. See [[io.github.tassiluca.ds.typecheck.IO]] for a type-safe version. */
 trait IO:
+  /** Write to an IO stream. */
   def write(content: String)(using CanFail): Unit
+  /** Read from an IO stream. */
   def read[T](f: Iterator[String] => T)(using CanFail): T
 
 object IO:
-  /** Effect. */
   def write(x: String)(using IO, CanFail): Unit = summon[IO].write(x)
 
-  /** Effect. */
   def read[T](f: Iterator[String] => T)(using IO, CanFail): T = summon[IO].read(f)
 
-  /** Capability generator. */
+  /** Capability generator for console-based IO. */
   def console[R](body: IO ?=> R): Runnable[R] = () =>
     given IO with // actual effect handler
       def write(content: String)(using CanFail): Unit = Console.println(content)
       def read[T](f: Iterator[String] => T)(using CanFail): T = f(scala.io.StdIn.readLine.linesIterator)
     body
 
-  /** Capability generator. */
+  /** Capability generator for file-based IO. */
   def file[R](path: Path)(body: IO ?=> R): Runnable[R] = () =>
     given IO with // actual effect handler
       def write(content: String)(using CanFail): Unit =
@@ -43,20 +44,37 @@ object IO:
 
 import IO.*
 
-@main def testIO(): Unit =
+@main def consoleIO(): Unit = either:
   val ioEff = IO.console:
-    either:
-      write("Welcome to the parrrot game!")
-      write("You say something:")
-      val r = read(_.mkString)
-      write("I repeat it: " + r)
+    write("Welcome to the parrrot game!")
+    write("You say something:")
+    val r = read(_.mkString)
+    write("I repeat it: " + r)
   ioEff.run()
+
+@main def safeFileIO = either:
+  val path = Path.of("test.txt")
+  val eff: Runnable[String] = IO.file(path):
+    write("Hello, World from IO capability!")
+    read(_.mkString)
+  val content = eff.run() // the effect is run!
+  println(s"The content is: ${content}")
 
 @main def breakingIO = either:
   val path = Path.of("test.txt")
   // The lines are returned as an iterator, no lines are read yet...
   val eff: Runnable[Iterator[String]] = IO.file(path):
-    read(identity)
+    write("Let's break the IO capability!")
+    read(lines => lines)
   // ...when we try to execute the effect, the lines are read but the stream is already closed!
-  val content = eff.run().next() // throws "IOException: Stream Already Closed"!!!
-  println(content)
+  val content: Iterator[String] = eff.run()
+  content.next() // throws "IOException: Stream Already Closed"!!!
+
+@main def breakingIO2 = either:
+  val path = Path.of("test.txt")
+  val laterEff: Runnable[() => String] = IO.file(path):
+    write("Let's break the IO capability / 2!")
+    read(l => () => l.mkString)
+  val result = laterEff.run()
+  println:
+    result()
