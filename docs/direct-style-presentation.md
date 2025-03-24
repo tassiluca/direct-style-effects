@@ -103,6 +103,8 @@ Luca Tassinari
 
 25/03/2025
 
+[_<ins>Link to code examples &#x2197;</ins>_](https://github.com/tassiluca/direct-style-effects)
+
 </div>
 
 ---
@@ -553,6 +555,8 @@ where `T` is a regular type and `{cap1, cap2, ..., capN}` is called **capture se
 - When a class `C` extends the `Capability` trait, it is the same as if the type of `C` is `C^{cap}`
 
 ```scala
+import scala.language.experimental.captureChecking
+
 trait IO extends Capability:
   def write(content: String)(using CanFail): Unit
   def read[T](f: Iterator[String]^ => T)(using CanFail): T
@@ -595,9 +599,14 @@ Now, the compiler recognizes the leakage of the capabilities outside the intende
 
 ---
 
+### Code examples
+
+All the code examples shown in this presentation (and more) are available [here &#x2197;](https://github.com/tassiluca/direct-style-effects).
+
 ### References
 
-- [Martin Odersky, Aleksander Boruch-Gruszecki, Edward Lee, Jonathan Brachthäuser, Ondřej Lhoták, Scoped Capabilities for Polymorphic Effects](https://arxiv.org/abs/2207.03402)
-- [Gears project library](https://github.com/lampepfl/gears)
-- [Capture checking](https://dotty.epfl.ch/docs/reference/experimental/cc.html)
-- [`CanThrow` capability](https://dotty.epfl.ch/docs/reference/experimental/canthrow.html)
+- [Martin Odersky, Aleksander Boruch-Gruszecki, Edward Lee, Jonathan Brachthäuser, Ondřej Lhoták, Scoped Capabilities for Polymorphic Effects &#x2197;](https://arxiv.org/abs/2207.03402)
+- [Gears project library &#x2197;](https://github.com/lampepfl/gears)
+- [Capture checking &#x2197;](https://dotty.epfl.ch/docs/reference/experimental/cc.html)
+- [`CanThrow` capability &#x2197;](https://dotty.epfl.ch/docs/reference/experimental/canthrow.html)
+- [More experiments in Gears are available here &#x2197;](https://tassiluca.github.io/direct-style-experiments/)

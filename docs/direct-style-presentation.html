@@ -184,6 +184,7 @@ table {
 <p>Luca Tassinari</p>
 <div class="smaller">
 <p>25/03/2025</p>
+<p><a href="https://github.com/tassiluca/direct-style-effects"><em><ins>Link to code examples ↗</ins></em></a></p>
 </div>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
@@ -3300,7 +3301,7 @@ table {
 <ul>
 <li><em>Consequence</em>: the lines are read only after the file has been closed, which results in an <code>IOException</code> being thrown;</li>
 <li>the same happens if, for example, a lambda is returned, as shown here:<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-type">IO</span>.file(path):
-  () =&gt; read(_.mkString)
+  read(() =&gt; _.mkString)
 </code></pre>
 </li>
 </ul>
@@ -3486,12 +3487,14 @@ table {
 <p>where <code>T</code> is a regular type and <code>{cap1, cap2, ..., capN}</code> is called <strong>capture set</strong> and it represents the set of capabilities that the type <code>T</code> can capture or reference.</p>
 <ul>
 <li>if the capture set is empty the type is <strong>pure</strong>, otherwise it is considered <strong>impure</strong>;</li>
-<li><code>cap</code> is the <strong>universal capability</strong> which is the most sweeping capability from which all other capabilities are derived;</li>
+<li><code>cap</code> is the <strong>universal capability</strong> which is the most sweeping capability from which all other capabilities are derived. <code>T^{cap}</code> can be abbreviated as <code>T^</code>.;</li>
 <li>When a class <code>C</code> extends the <code>Capability</code> trait, it is the same as if the type of <code>C</code> is <code>C^{cap}</code></li>
 </ul>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IO</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Capability</span></span>:
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-keyword">import</span> scala.language.experimental.captureChecking
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IO</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Capability</span></span>:
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">write</span></span>(content: <span class="hljs-type">String</span>)(<span class="hljs-keyword">using</span> <span class="hljs-type">CanFail</span>): <span class="hljs-type">Unit</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read</span></span>[<span class="hljs-type">T</span>](f: <span class="hljs-type">Iterator</span>[<span class="hljs-type">String</span>] =&gt; <span class="hljs-type">T</span>)(<span class="hljs-keyword">using</span> <span class="hljs-type">CanFail</span>): <span class="hljs-type">T</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read</span></span>[<span class="hljs-type">T</span>](f: <span class="hljs-type">Iterator</span>[<span class="hljs-type">String</span>]^ =&gt; <span class="hljs-type">T</span>)(<span class="hljs-keyword">using</span> <span class="hljs-type">CanFail</span>): <span class="hljs-type">T</span>
 
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">IO</span></span>:
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">file</span></span>[<span class="hljs-type">R</span>](path: <span class="hljs-type">Path</span>)(body: <span class="hljs-type">IO</span> ?=&gt; <span class="hljs-type">R</span>): <span class="hljs-type">Runnable</span>[<span class="hljs-type">R</span>]^{body} = <span class="hljs-comment">/* same as before */</span>
@@ -3669,17 +3672,22 @@ table {
   width: 100%;
 }
 ;" data-marpit-pagination-total="21">
-<p>Now, the compiler recognizes we are trying to assign to the type variable <code>R</code> a capturing type carrying the universal capability, which is forbidden and a compilation error is raised:</p>
+<p>Now, the compiler recognizes the leakage of the capabilities outside the intended scope and raises an error:</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-scala"><span class="hljs-meta">@main</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">breakingIO</span> </span>= either:
   <span class="hljs-keyword">val</span> path = <span class="hljs-type">Path</span>.of(<span class="hljs-string">&quot;test.txt&quot;</span>)
   <span class="hljs-keyword">val</span> eff = <span class="hljs-type">IO</span>.file(path):
-    () =&gt; read(_.mkString)
-  <span class="hljs-comment">//~~~~~~~~~~~~~~~~~~~~~~</span>
-  <span class="hljs-comment">// Compilation error: local reference IO leaks into outer capture </span>
-  <span class="hljs-comment">// set of type parameter R of method file in object IO</span>
+    write(<span class="hljs-string">&quot;Hello, World from IO capability!&quot;</span>) <span class="hljs-comment">// ok!</span>
+    read(_.mkString) <span class="hljs-comment">// ok!</span>
+
+    read(l =&gt; l) <span class="hljs-comment">//, or equivalently: read(identity)</span>
+    <span class="hljs-comment">// ^^^^^^^^^</span>
+    <span class="hljs-comment">// local reference l leaks into outer capture set of type parameter T of method read in object IO</span>
+
+    () =&gt; write(<span class="hljs-string">&quot;Hello, World from IO capability!&quot;</span>)
+    <span class="hljs-comment">// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="hljs-comment">// local reference IO leaks into outer capture set of type parameter R of method file in object IO</span>
   <span class="hljs-keyword">val</span> content = eff.run()
 </code></pre>
-<p>However, in some cases, the compiler is still unable to detect the leakage of capabilities. For instance, in the example above, where an <code>Iterator[String]</code> is returned. The Scala 3 standard library has not yet been fully covered by the capture checking mechanism.</p>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-footer="Scala 3 Direct Style Effect Management" data-paginate="true" data-theme="uncover" data-style="h1 { font-size: 1.6rem; }
@@ -4041,12 +4049,15 @@ table {
   width: 100%;
 }
 ;" data-marpit-pagination-total="21">
+<h3 id="code-examples">Code examples</h3>
+<p>All the code examples shown in this presentation (and more) are available <a href="https://github.com/tassiluca/direct-style-effects">here ↗</a>.</p>
 <h3 id="references">References</h3>
 <ul>
-<li><a href="https://arxiv.org/abs/2207.03402">Martin Odersky, Aleksander Boruch-Gruszecki, Edward Lee, Jonathan Brachthäuser, Ondřej Lhoták, Scoped Capabilities for Polymorphic Effects</a></li>
-<li><a href="https://github.com/lampepfl/gears">Gears project library</a></li>
-<li><a href="https://dotty.epfl.ch/docs/reference/experimental/cc.html">Capture checking</a></li>
-<li><a href="https://dotty.epfl.ch/docs/reference/experimental/canthrow.html"><code>CanThrow</code> capability</a></li>
+<li><a href="https://arxiv.org/abs/2207.03402">Martin Odersky, Aleksander Boruch-Gruszecki, Edward Lee, Jonathan Brachthäuser, Ondřej Lhoták, Scoped Capabilities for Polymorphic Effects ↗</a></li>
+<li><a href="https://github.com/lampepfl/gears">Gears project library ↗</a></li>
+<li><a href="https://dotty.epfl.ch/docs/reference/experimental/cc.html">Capture checking ↗</a></li>
+<li><a href="https://dotty.epfl.ch/docs/reference/experimental/canthrow.html"><code>CanThrow</code> capability ↗</a></li>
+<li><a href="https://tassiluca.github.io/direct-style-experiments/">More experiments in Gears are available here ↗</a></li>
 </ul>
 <footer>Scala 3 Direct Style Effect Management</footer>
 </section>
