@@ -11,7 +11,7 @@ import scala.annotation.experimental
 import scala.caps.Capability
 import scala.io.Source
 import scala.language.experimental.captureChecking
-import scala.util.Using
+import scala.util.{Try, Using}
 
 /** **Safe IO capability**. */
 trait IO extends Capability:
@@ -29,7 +29,7 @@ object IO:
   def console[R](body: IO ?=> R): Runnable[R]^{body} = () =>
     given IO with // actual effect handler
       def write(content: String)(using CanFail): Unit = Console.println(content)
-      def read[T](f: Iterator[String]^ => T)(using CanFail): T = f(scala.io.StdIn.readLine.linesIterator)
+      def read[T](f: Iterator[String]^ => T)(using CanFail): T = Try(f(scala.io.StdIn.readLine.linesIterator)).?
     body
 
   /** Capability generator for file-based IO. */

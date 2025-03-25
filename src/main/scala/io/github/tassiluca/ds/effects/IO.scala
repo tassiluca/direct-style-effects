@@ -25,7 +25,7 @@ object IO:
   /** Capability generator for console-based IO. */
   def console[R](body: IO ?=> R): Runnable[R] = () =>
     given IO with // actual effect handler
-      def write(content: String)(using CanFail): Unit = println(content)
+      def write(content: String)(using CanFail): Unit = Console.println(content)
       def read[T](f: Iterator[String] => T)(using CanFail): T = Try(f(scala.io.StdIn.readLine.linesIterator)).?
     body
 
