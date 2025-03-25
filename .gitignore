@@ -162,3 +162,4 @@ project/**/metals.sbt
 ### Static Content ###
 *.pdf
 *.txt
+*.html
