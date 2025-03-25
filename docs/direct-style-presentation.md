@@ -542,7 +542,9 @@ A capturing type is of the form...
 
 -->
 
-### Capture checking
+<!-- _footer: "" -->
+
+#### Capture checking
 
 To solve this issue `IO` needs to be marked as a _capability_ and the return type of the `file` method must keep track of the capability lifetime by using a **capturing type** of the form:
 
@@ -550,12 +552,13 @@ To solve this issue `IO` needs to be marked as a _capability_ and the return typ
 
 where `T` is a regular type and `{cap1, cap2, ..., capN}` is called **capture set** and it represents the set of capabilities that the type `T` can capture or reference.
 
+- Formally, a **capability** is a method- or class-parameter or a local variable whose type has a _non-empty_ capture set;
 - if the capture set is empty the type is **pure**, otherwise it is considered **impure**;
 - `cap` is the **universal capability** which is the most sweeping capability from which all other capabilities are derived. `T^{cap}` can be abbreviated as `T^`.;
 - When a class `C` extends the `Capability` trait, it is the same as if the type of `C` is `C^{cap}`
 
 ```scala
-import scala.language.experimental.captureChecking
+import scala.language.experimental.captureChecking // experimental feature 
 
 trait IO extends Capability:
   def write(content: String)(using CanFail): Unit
