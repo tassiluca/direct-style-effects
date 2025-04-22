@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="root:main [file:/Users/lucatassi/Projects/asmd/asmd-24-direct-style/]" external.linked.project.path="$MODULE_DIR$/../../.." external.root.project.path="$MODULE_DIR$/../../.." external.system.id="SBT" external.system.module.type="sbtSourceSet" type="JAVA_MODULE" version="4">
+  <component name="DisplayModuleName">
+    <option name="name" value="direct-style-effects.main" />
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_21">
+    <output url="file://$MODULE_DIR$/../../../target/scala-3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../../src/main/scala" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../target/scala-3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY/resource_managed/main" />
+    <content url="file://$MODULE_DIR$/../../../target/scala-3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY/src_managed/main" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="sbt: scala-sdk-3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.shared:ws_3:1.3.22:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala2-library-cc-tasty-experimental_3:3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.model:core_3:1.7.11:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-core_3:2.13.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala3-library_3:3.7.1-RC1-bin-20250318-4b09b13-NIGHTLY:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-kernel_3:2.13.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.shared:core_3:1.3.22:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.13.16:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.client3:core_3:3.10.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: ch.epfl.lamp:gears_3:0.2.0:jar" level="project" />
+  </component>
+</module>

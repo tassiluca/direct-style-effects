@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="sbt 1" modules="asmd-24-direct-style_5885" />
-    <profile name="sbt 2" modules="asmd-24-direct-style,direct-style-effects">
+    <option name="separateProdTestSources" value="true" />
+    <profile name="sbt 1" modules="asmd-24-direct-style_5885,direct-style-effects" />
+    <profile name="sbt 2" modules="asmd-24-direct-style,direct-style-effects.main,direct-style-effects.test">
       <parameters>
         <parameter value="-explain" />
         <parameter value="-experimental" />
