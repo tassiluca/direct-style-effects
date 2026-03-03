@@ -1,6 +1,6 @@
 import Dependencies.*
 
-val scala = "3.7.4"
+val scala = "3.8.2"
 
 ThisBuild / scalaVersion     := scala
 ThisBuild / scalacOptions    ++= Seq("-explain", "-experimental")
