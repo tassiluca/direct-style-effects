@@ -25,6 +25,6 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.jvm-version }}
       - name: Setup sbt launcher
-        uses: sbt/setup-sbt@dd1ef7d7798fab5ce802a6adab3b782817b8c2d0 # v1
+        uses: sbt/setup-sbt@508b753e53cb6095967669e0911487d2b9bc9f41 # v1
       - name: Build and test
         run: sbt +test
