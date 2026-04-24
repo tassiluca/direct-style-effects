@@ -10,7 +10,7 @@ lazy val root = (project in file("."))
     name := "direct-style-effects",
     libraryDependencies ++= Seq(
       munit % Test,
-      "ch.epfl.lamp" %% "gears" % "0.2.0",
+      "ch.epfl.lamp" %% "gears" % "0.3.0",
       "com.softwaremill.sttp.client3" %% "core" % "3.11.0",
       "org.typelevel" %% "cats-core" % "2.13.0",
       "org.scala-lang" %% "scala2-library-cc-tasty-experimental" % scala,
